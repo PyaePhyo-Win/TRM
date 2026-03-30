@@ -37,5 +37,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Expose the port Render expects
 EXPOSE 10000
 
-# 3. The Start Command: Run migrations, then start the server
-CMD sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000"
+# 3. The Start Command: Run migrations, seed the database, then start the server
+CMD sh -c "php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=10000"
