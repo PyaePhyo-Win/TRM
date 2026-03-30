@@ -8,7 +8,6 @@ use App\Models\Paddy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 
@@ -20,7 +19,7 @@ class ReportController extends Controller
             new Middleware(PermissionMiddleware::using('user-dashboard'), only: ['appointmentHistory', 'paddyProcessing', 'appointmentHistoryPdf', 'paddyProcessingPdf']),
         ];
     }
-    
+
     public function appointmentHistory(Request $request)
     {
         $user = Auth::user();
