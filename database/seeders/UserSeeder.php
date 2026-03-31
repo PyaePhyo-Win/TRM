@@ -45,29 +45,38 @@ class UserSeeder extends Seeder
             ],
         ];
 
+        // 1. Find the role safely
         $role = Role::where('name', 'merchant')->first();
 
-        $permissions = Permission::where('name', 'user-dashboard')->get();
-        $role->syncPermissions($permissions);
+        if ($role) {
+            // 2. Sync permissions (safe to run multiple times)
+            $permissions = Permission::where('name', 'user-dashboard')->get();
+            $role->syncPermissions($permissions);
 
-        foreach ($users as $user) {
-            $data = User::create([
-                'name' => $user['name'],
-                'full_name' => $user['full_name'],
-                'nrc' => $user['nrc'],
-                'phone' => $user['phone'],
-                'address' => $user['address'],
-                'gender' => $user['gender'],
-                'date_of_birth' => $user['date_of_birth'],
-                'email' => $user['email'],
-                'email_verified_at' => $user['email_verified_at'],
-                'password' => bcrypt($user['password']),
-                'is_opened' => $user['is_opened'],
-                'status' => $user['status'],
-            ]);
+            foreach ($users as $user) {
+                // 3. updateOrCreate checks the email first. If it exists, it just updates the data.
+                $data = User::updateOrCreate(
+                    ['email' => $user['email']], // Unique identifier
+                    [
+                        'name' => $user['name'],
+                        'full_name' => $user['full_name'],
+                        'nrc' => $user['nrc'],
+                        'phone' => $user['phone'],
+                        'address' => $user['address'],
+                        'gender' => $user['gender'],
+                        'date_of_birth' => $user['date_of_birth'],
+                        'email_verified_at' => $user['email_verified_at'],
+                        'password' => bcrypt($user['password']),
+                        'is_opened' => $user['is_opened'],
+                        'status' => $user['status'],
+                    ]
+                );
 
-            $data->assignRole('merchant');
-
+                // 4. Assign the role only if they don't have it already
+                if (!$data->hasRole($role->name)) {
+                    $data->assignRole($role->name);
+                }
+            }
         }
     }
 }

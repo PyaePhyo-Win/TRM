@@ -31,32 +31,39 @@ class AdminSeeder extends Seeder
             ],
         ];
 
+        // 1. Find the role safely
         $role = Role::where('name', 'superadmin')->first();
 
-        // Assign all permissions to the role ONCE
-        $permissions = Permission::where('guard_name', 'web')->get();
-        $role->syncPermissions($permissions);
-        $role->revokePermissionTo('user-dashboard'); // Revoke 'user-dashboard' from superadmin
+        if ($role) {
+            // 2. Sync permissions safely (syncPermissions handles duplicates automatically)
+            $permissions = Permission::where('guard_name', 'web')->get();
+            $role->syncPermissions($permissions);
+            $role->revokePermissionTo('user-dashboard');
 
-        foreach ($users as $user) {
-            $data = User::create([
-                'name' => $user['name'],
-                'full_name' => $user['full_name'],
-                'nrc' => $user['nrc'],
-                'phone' => $user['phone'],
-                'address' => $user['address'],
-                'gender' => $user['gender'],
-                'date_of_birth' => $user['date_of_birth'],
-                'email' => $user['email'],
-                'email_verified_at' => $user['email_verified_at'],
-                'password' => bcrypt($user['password']),
-                'is_opened' => $user['is_opened'],
-                'status' => $user['status'],
-            ]);
+            foreach ($users as $user) {
+                // 3. Use updateOrCreate to avoid "Duplicate Entry" errors
+                $newUser = User::updateOrCreate(
+                    ['email' => $user['email']], // Unique identifier to check
+                    [
+                        'name' => $user['name'],
+                        'full_name' => $user['full_name'],
+                        'nrc' => $user['nrc'],
+                        'phone' => $user['phone'],
+                        'address' => $user['address'],
+                        'gender' => $user['gender'],
+                        'date_of_birth' => $user['date_of_birth'],
+                        'email_verified_at' => $user['email_verified_at'],
+                        'password' => bcrypt($user['password']),
+                        'is_opened' => $user['is_opened'],
+                        'status' => $user['status'],
+                    ]
+                );
 
-            $data->assignRole($role->name);
-
+                // 4. Assign role only if they don't have it
+                if (!$newUser->hasRole($role->name)) {
+                    $newUser->assignRole($role->name);
+                }
+            }
         }
-
     }
 }
