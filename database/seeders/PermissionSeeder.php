@@ -219,11 +219,14 @@ class PermissionSeeder extends Seeder
                 'category' => 'Result Management',
                 'guard_name' => 'web',
             ],
-            
+
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create($permission);
+            Permission::updateOrCreate(
+                ['name' => $permission['name']], // Unique identifier
+                $permission
+            );
         }
     }
 }

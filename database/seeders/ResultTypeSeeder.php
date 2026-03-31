@@ -20,7 +20,10 @@ class ResultTypeSeeder extends Seeder
         ];
 
         foreach ($result_types as $result_type) {
-            ResultType::create($result_type);
+            ResultType::updateOrCreate(
+                ['name' => $result_type['name']], // Unique identifier
+                $result_type
+            );
         }
     }
 }

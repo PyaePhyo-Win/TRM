@@ -12,13 +12,16 @@ class AppointmentTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        $apppointment_types = [
+        $appointment_types = [
             ['name' => 'milling', 'description' => 'Milling appointment type'],
             ['name' => 'drying', 'description' => 'Drying appointment type'],
         ];
 
-        foreach ($apppointment_types as $apppointment_type) {
-            AppointmentType::create($apppointment_type);
+        foreach ($appointment_types as $appointment_type) {
+            AppointmentType::updateOrCreate(
+                ['name' => $appointment_type['name']], // Unique identifier
+                $appointment_type
+            );
         }
     }
 }
